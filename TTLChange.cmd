@@ -1,15 +1,15 @@
 ::==================================================================
 ::   TTL Change - Change TTL to bypass hotspot limit
-::   Github: https://github.com/lhphuc-ctu
+::   Github: https://github.com/phuc4real
 ::==================================================================
 
 
 ::==================================================================
 
-:: Check if it running as administator. If not, then prompt an administator request
+:: Check if it running as administrator. If not, then prompt an administrator request
 if not "%1"=="am_admin" (
     TIMEOUT 2 > NUL
-    @ECHO :: Requesting administator access...
+    @ECHO :: Requesting administrator access...
     powershell -Command "Start-Process -Verb RunAs -FilePath '%0' -ArgumentList 'am_admin'"
     exit /b
 )
@@ -49,15 +49,15 @@ echo:             [5] Help
 echo:             [0] Exit                                   
 echo:       ______________________________________________________________
 echo:
-echo:            [92m Enter a menu option in the Keyboard [1,2,3,4,0] :[0m
+echo:            [92m Enter a menu option in the Keyboard [1,2,3,4,5,0] :[0m
 choice /C:123450 /N
 set _goto=%errorlevel%
 
 if %_goto%==6 exit /b
-if %_goto%==5 start https://github.com/lhphuc-ctu & goto :MainMenu
+if %_goto%==5 start https://github.com/phuc4real & goto :MainMenu
 if %_goto%==4 goto :SetDefault
 if %_goto%==3 goto :CustomTTL
-if %_goto%==2 goto :WifiRepreater
+if %_goto%==2 goto :WifiRepeater
 if %_goto%==1 goto :Hotspot
 goto :MainMenu
 
@@ -67,17 +67,17 @@ goto :MainMenu
 echo:             Using Mobile Hotspot:
 netsh int ipv4 set glob defaultcurhoplimit=65 >NUL
 netsh int ipv6 set glob defaultcurhoplimit=65 >NUL
-echo:             Change TTL value sucess! 
+echo:             Change TTL value success!
 timeout 1 >NUL
 goto :MainMenu
 
 ::========================================================================================================================================
-:WifiRepreater
+:WifiRepeater
 
 echo:             Wi-Fi repeater
 netsh int ipv4 set glob defaultcurhoplimit=64 >NUL
 netsh int ipv6 set glob defaultcurhoplimit=64 >NUL
-echo:             Change TTL value sucess! 
+echo:             Change TTL value success!
 timeout 1 >NUL
 goto :MainMenu
 
@@ -85,12 +85,27 @@ goto :MainMenu
 :CustomTTL
 
 echo:             Custom TTL value
-echo:             Enter TTL value:                
+echo:             Enter TTL value (1-255):
+set "Input="
 set /p Input=""
+
+:: Validate: must be non-empty and contain digits only
+if not defined Input goto :CustomInvalid
+for /f "delims=0123456789" %%a in ("%Input%") do goto :CustomInvalid
+
+:: Validate range 1-255
+if %Input% LSS 1 goto :CustomInvalid
+if %Input% GTR 255 goto :CustomInvalid
+
 netsh int ipv4 set glob defaultcurhoplimit=%Input% >NUL
 netsh int ipv6 set glob defaultcurhoplimit=%Input% >NUL
-echo:             Change TTL value sucess! 
+echo:             Change TTL value success!
 timeout 1 >NUL
+goto :MainMenu
+
+:CustomInvalid
+echo:             Invalid TTL value. Please enter a number from 1 to 255.
+timeout 2 >NUL
 goto :MainMenu
 
 ::========================================================================================================================================
@@ -99,10 +114,8 @@ goto :MainMenu
 echo:             Set to default
 netsh int ipv4 set glob defaultcurhoplimit=128 >NUL
 netsh int ipv6 set glob defaultcurhoplimit=128 >NUL
-echo:             Change TTL value sucess! 
+echo:             Change TTL value success!
 timeout 1 >NUL
 goto :MainMenu
 
 ::========================================================================================================================================
-
-pause
